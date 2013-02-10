@@ -61,47 +61,71 @@
 // Override the setters and getters to always reflect the body's properties.
 -(CGPoint)position
 {
-	return cpBodyGetPos(_cpBody);
+    if (_cpBody)
+        return cpBodyGetPos(_cpBody);
+    else
+        return [super position];
 }
 
 -(void)setPosition:(CGPoint)position
 {
-	cpBodySetPos(_cpBody, position);
+    if (_cpBody)
+        cpBodySetPos(_cpBody, position);
+    else
+        [super setPosition:position];
 }
 
 -(float)rotation
 {
-	return (_ignoreBodyRotation ? super.rotation : -CC_RADIANS_TO_DEGREES(cpBodyGetAngle(_cpBody)));
+    if (_cpBody)
+        return (_ignoreBodyRotation ? super.rotation : -CC_RADIANS_TO_DEGREES(cpBodyGetAngle(_cpBody)));
+    else
+        return [super rotation];
 }
 
 -(void)setRotation:(float)rotation
 {
-	if(_ignoreBodyRotation){
-		super.rotation = rotation;
-	} else {
-		cpBodySetAngle(_cpBody, -CC_DEGREES_TO_RADIANS(rotation));
-	}
+    
+    if (_cpBody) {
+        if(_ignoreBodyRotation){
+            super.rotation = rotation;
+        } else {
+            cpBodySetAngle(_cpBody, -CC_DEGREES_TO_RADIANS(rotation));
+        }
+    } else {
+        [super setRotation:rotation];
+    }
 }
 
 // returns the transform matrix according the Chipmunk Body values
 -(CGAffineTransform) nodeToParentTransform
 {
-	// Although scale is not used by physics engines, it is calculated just in case
-	// the sprite is animated (scaled up/down) using actions.
-	// For more info see: http://www.cocos2d-iphone.org/forum/topic/68990
-	cpVect rot = (_ignoreBodyRotation ? cpvforangle(-CC_DEGREES_TO_RADIANS(_rotationX)) : _cpBody->rot);
-	CGFloat x = _cpBody->p.x + rot.x * -_anchorPointInPoints.x * _scaleX - rot.y * -_anchorPointInPoints.y * _scaleY;
-	CGFloat y = _cpBody->p.y + rot.y * -_anchorPointInPoints.x * _scaleX + rot.x * -_anchorPointInPoints.y * _scaleY;
-	
-	if(_ignoreAnchorPointForPosition){
-		x += _anchorPointInPoints.x;
-		y += _anchorPointInPoints.y;
-	}
-	
-	return (_transform = CGAffineTransformMake(rot.x * _scaleX, rot.y * _scaleX,
-											   -rot.y * _scaleY, rot.x * _scaleY,
-											   x,	y));
+    
+    if (_cpBody) {
+        
+        // Although scale is not used by physics engines, it is calculated just in case
+        // the sprite is animated (scaled up/down) using actions.
+        // For more info see: http://www.cocos2d-iphone.org/forum/topic/68990
+        cpVect rot = (_ignoreBodyRotation ? cpvforangle(-CC_DEGREES_TO_RADIANS(_rotationX)) : _cpBody->rot);
+        CGFloat x = _cpBody->p.x + rot.x * -_anchorPointInPoints.x * _scaleX - rot.y * -_anchorPointInPoints.y * _scaleY;
+        CGFloat y = _cpBody->p.y + rot.y * -_anchorPointInPoints.x * _scaleX + rot.x * -_anchorPointInPoints.y * _scaleY;
+        
+        if (_ignoreAnchorPointForPosition){
+            x += _anchorPointInPoints.x;
+            y += _anchorPointInPoints.y;
+        }
+        
+        return (_transform = CGAffineTransformMake(rot.x * _scaleX, rot.y * _scaleX,
+                                                   -rot.y * _scaleY, rot.x * _scaleY,
+                                                   x,	y));
+        
+    } else {
+        return [super nodeToParentTransform];
+    }
+    
 }
+
+
 
 #elif CC_ENABLE_BOX2D_INTEGRATION
 

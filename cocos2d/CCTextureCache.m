@@ -292,7 +292,8 @@ static CCTextureCache *sharedTextureCache;
 
 		// all images are handled by UIKit/AppKit except PVR extension that is handled by cocos2d's handler
 
-		if ( [lowerCase hasSuffix:@".pvr"] || [lowerCase hasSuffix:@".pvr.gz"] || [lowerCase hasSuffix:@".pvr.ccz"] )
+		if ( [lowerCase hasSuffix:@".pvr"] || [lowerCase hasSuffix:@".pvr.gz"] || [lowerCase hasSuffix:@".pvr.ccz"] ||
+            [lowerCase hasSuffix:@".pvrtc"])
 			tex = [self addPVRImage:path];
 
 #ifdef __CC_PLATFORM_IOS

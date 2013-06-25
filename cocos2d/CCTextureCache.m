@@ -265,6 +265,10 @@ static CCTextureCache *sharedTextureCache;
 	});
 }
 
+-(void) waitForAsyncLoadingToComplete {
+    dispatch_sync(_loadingQueue, ^{});
+}
+
 -(CCTexture2D*) addImage: (NSString*) path
 {
 	NSAssert(path != nil, @"TextureCache: fileimage MUST not be nil");

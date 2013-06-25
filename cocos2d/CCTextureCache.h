@@ -81,6 +81,7 @@
  */
 -(void) addImageAsync:(NSString*) filename withBlock:(void(^)(CCTexture2D *tex))block;
 
+-(void) waitForAsyncLoadingToComplete;
 
 /** Returns a Texture2D object given an CGImageRef image
  * If the image was not previously loaded, it will create a new CCTexture2D object and it will return it.

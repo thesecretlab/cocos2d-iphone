@@ -1,16 +1,16 @@
 /*
  Copyright (c) 2010 Steve Oldmeadow
-
+ 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
  in the Software without restriction, including without limitation the rights
  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  copies of the Software, and to permit persons to whom the Software is
  furnished to do so, subject to the following conditions:
-
+ 
  The above copyright notice and this permission notice shall be included in
  all copies or substantial portions of the Software.
-
+ 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -18,7 +18,7 @@
  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
-
+ 
  $Id$
  */
 
@@ -71,14 +71,14 @@ static CDBufferManager *bufferManager = nil;
 	[super dealloc];
 }
 
-+(void) end
++(void) end 
 {
 	am = nil;
 	[CDAudioManager end];
 	[bufferManager release];
 	[sharedEngine release];
 	sharedEngine = nil;
-}
+}	
 
 #pragma mark SimpleAudioEngine - background music
 
@@ -103,11 +103,11 @@ static CDBufferManager *bufferManager = nil;
 
 -(void) pauseBackgroundMusic {
 	[am pauseBackgroundMusic];
-}
+}	
 
 -(void) resumeBackgroundMusic {
 	[am resumeBackgroundMusic];
-}
+}	
 
 -(void) rewindBackgroundMusic {
 	[am rewindBackgroundMusic];
@@ -115,7 +115,7 @@ static CDBufferManager *bufferManager = nil;
 
 -(BOOL) isBackgroundMusicPlaying {
 	return [am isBackgroundMusicPlaying];
-}
+}	
 
 -(BOOL) willPlayBackgroundMusic {
 	return [am willPlayBackgroundMusic];
@@ -130,9 +130,14 @@ static CDBufferManager *bufferManager = nil;
 
 -(ALuint) playEffect:(NSString*) filePath pitch:(Float32) pitch pan:(Float32) pan gain:(Float32) gain
 {
-	int soundId = [bufferManager bufferForFile:filePath create:YES];
+    return [self playEffect:filePath pitch:pitch pan:pan gain:gain loop:false];
+	
+}
+
+-(ALuint) playEffect:(NSString*) filePath pitch:(Float32) pitch pan:(Float32) pan gain:(Float32) gain loop:(BOOL)loop {
+    int soundId = [bufferManager bufferForFile:filePath create:YES];
 	if (soundId != kCDNoBuffer) {
-		return [soundEngine playSound:soundId sourceGroupId:0 pitch:pitch pan:pan gain:gain loop:false];
+		return [soundEngine playSound:soundId sourceGroupId:0 pitch:pitch pan:pan gain:gain loop:loop];
 	} else {
 		return CD_MUTE;
 	}
@@ -140,7 +145,7 @@ static CDBufferManager *bufferManager = nil;
 
 -(void) stopEffect:(ALuint) soundId {
 	[soundEngine stopSound:soundId];
-}
+}	
 
 -(void) preloadEffect:(NSString*) filePath
 {
@@ -167,7 +172,7 @@ static CDBufferManager *bufferManager = nil;
 	if (mute_ != muteValue) {
 		mute_ = muteValue;
 		am.mute = mute_;
-	}
+	}	
 }
 
 -(BOOL) enabled
@@ -180,7 +185,7 @@ static CDBufferManager *bufferManager = nil;
 	if (enabled_ != enabledValue) {
 		enabled_ = enabledValue;
 		am.enabled = enabled_;
-	}
+	}	
 }
 
 
@@ -188,23 +193,23 @@ static CDBufferManager *bufferManager = nil;
 -(float) backgroundMusicVolume
 {
 	return am.backgroundMusic.volume;
-}
+}	
 
 -(void) setBackgroundMusicVolume:(float) volume
 {
 	am.backgroundMusic.volume = volume;
-}
+}	
 
 #pragma mark SimpleAudioEngine - EffectsVolume
 -(float) effectsVolume
 {
 	return am.soundEngine.masterGain;
-}
+}	
 
 -(void) setEffectsVolume:(float) volume
 {
 	am.soundEngine.masterGain = volume;
-}
+}	
 
 -(CDSoundSource *) soundSourceForFile:(NSString*) filePath {
 	int soundId = [bufferManager bufferForFile:filePath create:YES];
@@ -214,7 +219,20 @@ static CDBufferManager *bufferManager = nil;
 		return result;
 	} else {
 		return nil;
-	}
+	}	
 }
 
-@end
+// ******************************************************
+// SECRET LAB ADDITIONS
+// ******************************************************
+
+- (float) durationForEffect:(NSString*)path {
+    int soundId = [bufferManager bufferForFile:path create:YES];
+	if (soundId == kCDNoBuffer) {
+        return -1;
+    }
+    
+    return [soundEngine bufferDurationInSeconds:soundId];
+}
+
+@end 

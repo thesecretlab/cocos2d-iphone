@@ -88,11 +88,19 @@ static CDBufferManager *bufferManager = nil;
 
 -(void) playBackgroundMusic:(NSString*) filePath
 {
-	[am playBackgroundMusic:filePath loop:TRUE];
+	[self playBackgroundMusic:filePath loop:TRUE];
 }
 
 -(void) playBackgroundMusic:(NSString*) filePath loop:(BOOL) loop
 {
+    // Multiply gain with settings, if present
+    if ([[NSUserDefaults standardUserDefaults] objectForKey:@"music_volume"]) {
+        float volume = [[[NSUserDefaults standardUserDefaults] objectForKey:@"music_volume"] floatValue];
+        volume = fminf(1.0, volume);
+        volume = fmaxf(0.0, volume);
+        am.backgroundMusic.volume = volume;
+    }
+    
 	[am playBackgroundMusic:filePath loop:loop];
 }
 
@@ -137,6 +145,14 @@ static CDBufferManager *bufferManager = nil;
 -(ALuint) playEffect:(NSString*) filePath pitch:(Float32) pitch pan:(Float32) pan gain:(Float32) gain loop:(BOOL)loop {
     int soundId = [bufferManager bufferForFile:filePath create:YES];
 	if (soundId != kCDNoBuffer) {
+        
+        // Multiply gain with settings, if present
+        if ([[NSUserDefaults standardUserDefaults] objectForKey:@"sfx_volume"]) {
+            gain *= [[[NSUserDefaults standardUserDefaults] objectForKey:@"sfx_volume"] floatValue];
+            gain = fminf(1.0, gain);
+            gain = fmaxf(0.0, gain);
+        }
+        
 		return [soundEngine playSound:soundId sourceGroupId:0 pitch:pitch pan:pan gain:gain loop:loop];
 	} else {
 		return CD_MUTE;

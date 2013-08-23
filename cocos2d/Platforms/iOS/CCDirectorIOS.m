@@ -498,6 +498,10 @@ GLToClipTransform(kmMat4 *transformOut)
     // e.g. self.myOutlet = nil;
 }
 
+- (BOOL)prefersStatusBarHidden {
+    return YES;
+}
+
 #pragma mark helper
 
 -(void)getFPSImageData:(unsigned char**)datapointer length:(NSUInteger*)len

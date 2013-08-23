@@ -24,7 +24,6 @@
 //  THE SOFTWARE.
 
 #import "SimpleAudioEngine+SoundEvents.h"
-
 #import "SLConsole.h"
 
 NSString* const SimpleAudioEngineQueueModeAlways = @"always";

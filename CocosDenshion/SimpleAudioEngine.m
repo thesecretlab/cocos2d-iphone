@@ -58,13 +58,22 @@ static CDBufferManager *bufferManager = nil;
 		bufferManager = [[CDBufferManager alloc] initWithEngine:soundEngine];
 		mute_ = NO;
 		enabled_ = YES;
+        
+        // Subscribe to applicationDidBecomeActive to update the music volume when we return from the background
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillEnterForeground:) name:UIApplicationWillEnterForegroundNotification object:nil];
 	}
 	return self;
+}
+
+- (void) applicationWillEnterForeground:(NSNotification*)notification {
+    // We've come back from being inactive, so update the audio of the background music player to reflect the setting, which may have changed
+     [self updateBackgroundMusicVolumeFromSettings];
 }
 
 // Memory
 - (void) dealloc
 {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 	am = nil;
 	soundEngine = nil;
 	bufferManager = nil;
@@ -82,6 +91,17 @@ static CDBufferManager *bufferManager = nil;
 
 #pragma mark SimpleAudioEngine - background music
 
+- (void) updateBackgroundMusicVolumeFromSettings {
+    // Multiply gain with settings, if present
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    if ([[NSUserDefaults standardUserDefaults] objectForKey:@"music_volume"]) {
+        float volume = [[[NSUserDefaults standardUserDefaults] objectForKey:@"music_volume"] floatValue];
+        volume = fminf(1.0, volume);
+        volume = fmaxf(0.0, volume);
+        am.backgroundMusic.volume = volume;
+    }
+}
+
 -(void) preloadBackgroundMusic:(NSString*) filePath {
 	[am preloadBackgroundMusic:filePath];
 }
@@ -93,13 +113,7 @@ static CDBufferManager *bufferManager = nil;
 
 -(void) playBackgroundMusic:(NSString*) filePath loop:(BOOL) loop
 {
-    // Multiply gain with settings, if present
-    if ([[NSUserDefaults standardUserDefaults] objectForKey:@"music_volume"]) {
-        float volume = [[[NSUserDefaults standardUserDefaults] objectForKey:@"music_volume"] floatValue];
-        volume = fminf(1.0, volume);
-        volume = fmaxf(0.0, volume);
-        am.backgroundMusic.volume = volume;
-    }
+    [self updateBackgroundMusicVolumeFromSettings];
     
 	[am playBackgroundMusic:filePath loop:loop];
 }
